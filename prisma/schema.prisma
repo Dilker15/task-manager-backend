@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model status {
+  id    String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name  String  @db.VarChar(50)
+  type  Int     @default(1)
+  tasks tasks[]
+}
+
+model tasks {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String    @db.VarChar(100)
+  description String    @db.VarChar(255)
+  date_event  DateTime  @db.Timestamp(6)
+  created_on  DateTime? @default(now()) @db.Timestamp(6)
+  updated_on  DateTime? @default(now()) @db.Timestamp(6)
+  user_id     String    @db.Uuid
+  status_id   String    @db.Uuid
+  status      status    @relation(fields: [status_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users       users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model users {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name           String   @db.VarChar(50)
+  email          String   @unique @db.VarChar(50)
+  password       String   @db.VarChar(100)
+  state          Boolean? @default(true)
+  email_verified Boolean? @default(false)
+  tasks          tasks[]
+}
